@@ -3,15 +3,15 @@
 $BASE_URL = 'https://priceonlinelearning.herokuapp.com/';
 $API_URL = $BASE_URL . 'api/';
 
-function send_request($url, $postRequest = array())
+function send_request($url, $postRequest = array(), $delete = false)
 {
     $options = get_option('plugin_options');
     $headerRequest = array('Authorization: Token ' . $options['access_token']);
 
     $cURLConnection = curl_init($url);
-    if (count($postRequest) > 0) {
-        curl_setopt($cURLConnection, CURLOPT_POSTFIELDS, $postRequest);
-    }
+
+    if (count($postRequest) > 0) curl_setopt($cURLConnection, CURLOPT_POSTFIELDS, $postRequest);
+    if ($delete) curl_setopt($cURLConnection, CURLOPT_CUSTOMREQUEST, "DELETE");
     curl_setopt($cURLConnection, CURLOPT_HTTPHEADER, $headerRequest);
     curl_setopt($cURLConnection, CURLOPT_RETURNTRANSFER, true);
 
@@ -52,6 +52,13 @@ function add_product($product_id, $name, $original_price, $min_price, $max_price
     );
 
     return send_request($API_URL . 'add_product/', $postRequest);
+}
+
+function delete_product($product_id)
+{
+    global $API_URL;
+
+    return send_request($API_URL . 'delete_product/' . $product_id, array(), true);
 }
 
 function get_price($product_id, $cluster_id)

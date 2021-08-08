@@ -21,6 +21,37 @@ function fx_admin_notice_example_activation_hook()
 
 register_activation_hook(__FILE__, 'fx_admin_notice_example_activation_hook');
 
+// DAILY SCHEDULE
+
+register_activation_hook(__FILE__, 'update_all_prices_fn');
+
+function update_all_prices_fn()
+{
+    if (!wp_next_scheduled('update_all_product_prices')) {
+        wp_schedule_event(time(), 'daily', 'update_all_product_prices');
+    }
+}
+
+function update_all_product_prices()
+{
+
+    $results = get_all_prices();
+
+    foreach ($results as $product_results) {
+        $product_first_cluster = $product_results[0];
+
+        if (isset($product_first_cluster['price'])) {
+            $product = wc_get_product($product_first_cluster['product_id']);
+
+            $product->set_regular_price($product_first_cluster['price']);
+            $product->set_sale_price(false);
+            $product->save();
+        }
+    }
+}
+
+// NOTICE
+
 function fx_admin_notice_example_notice()
 {
 
@@ -68,11 +99,6 @@ function pol_general_settings()
     // days consistency
     add_settings_field('days-consistency-radio', 'Days Consistency', 'days_consistency_fn', __FILE__, 'main-section');
 
-
-    // Step 3: Clustering Customers
-    add_settings_section('clustering-section', '', 'clustering_section_fn', __FILE__);
-    // clustering options
-    add_settings_field('clustering-radio', 'Clustering', 'clustering_options_fn', __FILE__, 'clustering-section');
 }
 
 /**
@@ -244,17 +270,21 @@ function pol_options_page_html()
         </div>
 
         <div style="background: rgba(0,0,0,0.2); height: 3px; width: 100%; border-radius: 5px"></div>
-        <h3>Step 3: <b>Clustering Customers</b></h3>
+        <h3>( Step 3: <b>Clustering Customers</b> )</h3>
 
         <div>
 
-            POL does not provide clustering service
-            since to design a clustering algorithm domain knowledge and specific data analysis are required.
+            POL does not provide clustering services, because clustering algorithms require domain knowledge and
+            specific data analysis.
+            POL has been designed to be as general as possible to satisfy different requirements.
             <br>
-            POL has been design to be as general as possible to satisfy different requirements, thus
-            if you have the possibility to design a clustering algorithm, POL strongly recommends to do it.
-            Otherwise, you can choose among the simple and ready to use clustering options:
-
+            If you have the skills to design a clustering algorithm,
+            you can create clusters among your users and communicate the identifier of the cluster to POL using the <a
+                    href="https://priceonlinelearning.herokuapp.com/api/api_documentation/" target="_blank">APIs</a>.
+            <br>
+            <b>This plugin does not create clusters among your users.</b>
+            This means that if you have a MEDIUM or PRO plan on POL, you lose the benefit of providing different prices
+            for different clusters.
 
         </div>
 
@@ -271,3 +301,51 @@ function test_handle_post()
         add_all_products_to_pol();
     }
 }
+
+
+add_action('save_post', 'add_single_product_to_pol_fn', 10, 3);
+
+function add_single_product_to_pol_fn($post_id, $post, $update)
+{
+    if ($post->post_status != 'publish' || $post->post_type != 'product') {
+        return;
+    }
+
+    if (!$product = wc_get_product($post)) {
+        return;
+    }
+
+    $options = get_option('plugin_options');
+
+    $original_price = doubleval($product->get_regular_price());
+
+    add_product(
+        $product->get_id(),
+        $product->get_name(),
+        $original_price,
+        $original_price + $original_price * doubleval($options['min-price-radio']),
+        $original_price + $original_price * doubleval($options['max-price-radio']),
+        get_woocommerce_currency(),
+        intval($options['days-consistency-radio'])
+    );
+
+    $result = get_price($product->get_id(), 0);
+
+    if (isset($result['price'])) {
+        $product->set_regular_price($result['price']);
+        $product->set_sale_price(false);
+        $product->save();
+    }
+
+}
+
+add_action('wp_trash_post', 'delete_product_fn', 1);
+add_action('delete_post', 'delete_product_fn', 1);
+function delete_product_fn($post_id)
+{
+    if (get_post_type($post_id) != 'product') return;
+
+    $product = wc_get_product($post_id);
+    delete_product($product->get_id());
+}
+
