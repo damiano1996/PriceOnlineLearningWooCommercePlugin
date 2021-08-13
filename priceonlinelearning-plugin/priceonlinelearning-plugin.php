@@ -14,44 +14,59 @@ include 'utils.php';
 
 $app_name = 'Price Online Learning';
 
+// ON ACTIVATION
+
+register_activation_hook(__FILE__, 'set_default_options_fn');
+function set_default_options_fn()
+{
+    $options = get_option('plugin_options');
+
+    $options['access_token'] = "";
+    $options['min_price_option'] = 0.0;
+    $options['max_price_option'] = 0.2;
+    $options['days_consistency_option'] = 3;
+
+    update_option('plugin_options', $options);
+}
+
+//
+//// DAILY SCHEDULE
+//
+//register_activation_hook(__FILE__, 'update_all_prices_fn');
+//function update_all_prices_fn()
+//{
+//    if (!wp_next_scheduled('update_all_product_prices')) {
+//        wp_schedule_event(time(), 'daily', 'update_all_product_prices');
+//    }
+//}
+//
+//function update_all_product_prices()
+//{
+//
+//    $results = get_all_prices();
+//
+//    foreach ($results as $product_results) {
+//        $product_first_cluster = $product_results[0];
+//
+//        if (isset($product_first_cluster['price'])) {
+//            $product = wc_get_product($product_first_cluster['product_id']);
+//
+//            $product->set_regular_price($product_first_cluster['price']);
+//            $product->set_sale_price(false);
+//            $product->save();
+//        }
+//    }
+//}
+
+// NOTICE
+
+register_activation_hook(__FILE__, 'fx_admin_notice_example_activation_hook');
 function fx_admin_notice_example_activation_hook()
 {
     set_transient('fx-admin-notice-example', true, 5);
 }
 
-register_activation_hook(__FILE__, 'fx_admin_notice_example_activation_hook');
-
-// DAILY SCHEDULE
-
-register_activation_hook(__FILE__, 'update_all_prices_fn');
-
-function update_all_prices_fn()
-{
-    if (!wp_next_scheduled('update_all_product_prices')) {
-        wp_schedule_event(time(), 'daily', 'update_all_product_prices');
-    }
-}
-
-function update_all_product_prices()
-{
-
-    $results = get_all_prices();
-
-    foreach ($results as $product_results) {
-        $product_first_cluster = $product_results[0];
-
-        if (isset($product_first_cluster['price'])) {
-            $product = wc_get_product($product_first_cluster['product_id']);
-
-            $product->set_regular_price($product_first_cluster['price']);
-            $product->set_sale_price(false);
-            $product->save();
-        }
-    }
-}
-
-// NOTICE
-
+add_action('admin_notices', 'fx_admin_notice_example_notice');
 function fx_admin_notice_example_notice()
 {
 
@@ -60,7 +75,8 @@ function fx_admin_notice_example_notice()
         if (is_woocommerce_active()) {
             ?>
             <div class="updated notice is-dismissible">
-                <p>WooCommerce is installed.</p>
+                <p>WooCommerce is installed.<br>
+                    You can proceed with configurations: <a href="admin.php?page=pol-menu">settings</a>.</p>
             </div>
             <?php
         } else {
@@ -75,41 +91,26 @@ function fx_admin_notice_example_notice()
     }
 }
 
-add_action('admin_notices', 'fx_admin_notice_example_notice');
-
-
 // ---------------------------------------------------------------------------------------------------------------------
 
-/**
- * custom option and settings
- */
+add_action('admin_init', 'pol_general_settings');
 function pol_general_settings()
 {
 
     register_setting('plugin_options', 'plugin_options');
 
     // Step 1: General Settings
-    add_settings_section('main-section', '', 'section_text_fn', __FILE__);
+    add_settings_section('main_section', '', 'section_text_fn', __FILE__);
     // access token
-    add_settings_field('access-token', 'Personal Access Token', 'access_token_fn', __FILE__, 'main-section');
+    add_settings_field('access_token', 'Personal Access Token', 'access_token_fn', __FILE__, 'main_section');
     // min price
-    add_settings_field('min-price-radio', 'Minimum price', 'minimum_price_fn', __FILE__, 'main-section');
+    add_settings_field('min_price_option', 'Minimum price', 'minimum_price_fn', __FILE__, 'main_section');
     // max price
-    add_settings_field('max-price-radio', 'Maximum price', 'maximum_price_fn', __FILE__, 'main-section');
+    add_settings_field('max_price_option', 'Maximum price', 'maximum_price_fn', __FILE__, 'main_section');
     // days consistency
-    add_settings_field('days-consistency-radio', 'Days Consistency', 'days_consistency_fn', __FILE__, 'main-section');
+    add_settings_field('days_consistency_option', 'Days Consistency', 'days_consistency_fn', __FILE__, 'main_section');
 
 }
-
-/**
- * Register our pol_general_settings to the admin_init action hook.
- */
-add_action('admin_init', 'pol_general_settings');
-
-/**
- * Custom option and settings:
- *  - callback functions
- */
 
 
 function access_token_fn()
@@ -124,8 +125,8 @@ function access_token_fn()
     $is_valid = is_access_token_valid();
     $color = ($is_valid) ? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)';
 
-    echo "<p>Get it from your Price Online Learning (POL) <a href='https://priceonlinelearning.herokuapp.com/home_account/'>account page</a>.</p>";
-    echo "<input id='access-token' name='plugin_options[access_token]' size='40' type='text' value='{$options['access_token']}'
+    echo "<p>Get it from your Price Online Learning (POL) <a href='https://priceonlinelearning.herokuapp.com/home_account/' target='_blank'>account page</a>.</p>";
+    echo "<input id='access_token' name='plugin_options[access_token]' size='40' type='text' value='{$options['access_token']}'
             style='background: {$color}'/>";
 
     if ($is_valid) {
@@ -146,8 +147,8 @@ function minimum_price_fn()
     );
 
     foreach ($items as $item => $value) {
-        $checked = ($options['min-price-radio'] == $value) ? ' checked="checked" ' : '';
-        echo "<label><input " . $checked . " value='$value' name='plugin_options[min-price-radio]' type='radio' /> $item</label><br/>";
+        $checked = ($options['min_price_option'] == $value) ? ' checked="checked" ' : '';
+        echo "<label><input " . $checked . " value='$value' name='plugin_options[min_price_option]' type='radio' /> $item</label><br/>";
     }
 }
 
@@ -162,8 +163,8 @@ function maximum_price_fn()
     );
 
     foreach ($items as $item => $value) {
-        $checked = ($options['max-price-radio'] == $value) ? ' checked="checked" ' : '';
-        echo "<label><input " . $checked . " value='$value' name='plugin_options[max-price-radio]' type='radio' /> $item</label><br/>";
+        $checked = ($options['max_price_option'] == $value) ? ' checked="checked" ' : '';
+        echo "<label><input " . $checked . " value='$value' name='plugin_options[max_price_option]' type='radio' /> $item</label><br/>";
     }
 }
 
@@ -178,8 +179,8 @@ function days_consistency_fn()
     );
 
     foreach ($items as $item => $value) {
-        $checked = ($options['days-consistency-radio'] == $value) ? ' checked="checked" ' : '';
-        echo "<label><input " . $checked . " value='$value' name='plugin_options[days-consistency-radio]' type='radio' /> $item</label><br/>";
+        $checked = ($options['days_consistency_option'] == $value) ? ' checked="checked" ' : '';
+        echo "<label><input " . $checked . " value='$value' name='plugin_options[days_consistency_option]' type='radio' /> $item</label><br/>";
     }
 }
 
@@ -198,9 +199,7 @@ function clustering_options_fn()
 }
 
 
-/**
- * Add the top level menu page.
- */
+add_action('admin_menu', 'pol_options_page');
 function pol_options_page()
 {
     global $app_name;
@@ -212,15 +211,6 @@ function pol_options_page()
 }
 
 
-/**
- * Register our pol_options_page to the admin_menu action hook.
- */
-add_action('admin_menu', 'pol_options_page');
-
-/**
- * Top level menu callback function
- * @throws Exception
- */
 function pol_options_page_html()
 {
 
@@ -264,7 +254,10 @@ function pol_options_page_html()
             <form method="post" enctype="multipart/form-data">
                 <input type='hidden' name='add_all_products'/>
                 <?php submit_button('Add All Products');
-                test_handle_post();
+                try {
+                    test_handle_post();
+                } catch (Exception $e) {
+                }
                 ?>
             </form>
         </div>
@@ -304,7 +297,6 @@ function test_handle_post()
 
 
 add_action('save_post', 'add_single_product_to_pol_fn', 10, 3);
-
 function add_single_product_to_pol_fn($post_id, $post, $update)
 {
     if ($post->post_status != 'publish' || $post->post_type != 'product') {
@@ -312,6 +304,10 @@ function add_single_product_to_pol_fn($post_id, $post, $update)
     }
 
     if (!$product = wc_get_product($post)) {
+        return;
+    }
+
+    if (strcmp($product->get_meta('track_product'), 'yes') !== 0) {
         return;
     }
 
@@ -323,10 +319,10 @@ function add_single_product_to_pol_fn($post_id, $post, $update)
         $product->get_id(),
         $product->get_name(),
         $original_price,
-        $original_price + $original_price * doubleval($options['min-price-radio']),
-        $original_price + $original_price * doubleval($options['max-price-radio']),
+        $original_price + $original_price * doubleval($options['min_price_option']),
+        $original_price + $original_price * doubleval($options['max_price_option']),
         get_woocommerce_currency(),
-        intval($options['days-consistency-radio'])
+        intval($options['days_consistency_option'])
     );
 
     $result = get_price($product->get_id(), 0);
@@ -347,5 +343,31 @@ function delete_product_fn($post_id)
 
     $product = wc_get_product($post_id);
     delete_product($product->get_id());
+}
+
+// ----------------------------------------------
+
+add_action('woocommerce_product_options_general_product_data', 'track_product_with_pol_general_setting');
+function track_product_with_pol_general_setting()
+{
+    global $product_object;
+
+    $values = $product_object->get_meta('track_product');
+
+    $args = array(
+        'id' => 'track_product',
+        'label' => __('Manage prices with <br><b>Price Online Learning</b>', 'cfwc'),
+        'value' => empty($values) ? 'yes' : $values,
+        'desc_tip' => true,
+        'description' => __('If checked the prices will be handled by AI.', 'ctwc'),
+    );
+    woocommerce_wp_checkbox($args);
+}
+
+// Save quantity setting fields values
+add_action('woocommerce_admin_process_product_object', 'save_custom_field_product_options_pricing');
+function save_custom_field_product_options_pricing($product)
+{
+    $product->update_meta_data('track_product', isset($_POST['track_product']) ? 'yes' : 'no');
 }
 

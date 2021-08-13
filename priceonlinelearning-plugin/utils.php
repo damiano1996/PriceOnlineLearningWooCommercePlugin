@@ -38,10 +38,10 @@ function add_all_products_to_pol()
                 $product->get_id(),
                 $product->get_name(),
                 $original_price,
-                $original_price + $original_price * doubleval($options['min-price-radio']),
-                $original_price + $original_price * doubleval($options['max-price-radio']),
+                $original_price + $original_price * doubleval($options['min_price_option']),
+                $original_price + $original_price * doubleval($options['max_price_option']),
                 get_woocommerce_currency(),
-                intval($options['days-consistency-radio'])
+                intval($options['days_consistency_option'])
             );
 
             if (isset($result['product_id'])) {
