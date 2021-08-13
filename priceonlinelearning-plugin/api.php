@@ -54,6 +54,13 @@ function add_product($product_id, $name, $original_price, $min_price, $max_price
     return send_request($API_URL . 'add_product/', $postRequest);
 }
 
+function get_product_pol_info($product_id)
+{
+    global $API_URL;
+
+    return send_request($API_URL . 'get_product/' . $product_id);
+}
+
 function delete_product($product_id)
 {
     global $API_URL;
