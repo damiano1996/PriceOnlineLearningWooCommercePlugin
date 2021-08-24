@@ -141,10 +141,23 @@ class ProductData
              <b>Days consistency</b>: " . $pol_product['days_consistency'] . "</p>";
     }
 
-    public function save_custom_field_product_options_pricing($product)
+    private function update_track_product_metadata($product)
     {
         $product->update_meta_data('track_product', isset($_POST['track_product']) ? 'yes' : 'no');
     }
 
+    public function save_custom_field_product_options_pricing($product)
+    {
+        $this->update_track_product_metadata($product);
+
+        // updating for children in case of variational product
+        $variations_id = $product->get_children();
+
+        foreach ($variations_id as $variation_id) {
+
+            $variation_product = wc_get_product($variation_id);
+            $this->update_track_product_metadata($variation_product);
+        }
+    }
 
 }
