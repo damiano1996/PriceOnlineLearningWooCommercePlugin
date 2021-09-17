@@ -6,29 +6,29 @@ class DailyUpdate
     public function init()
     {
         register_activation_hook(POL_PLUGIN_FILE, array($this, 'scheduling_activation'));
-        add_action('my_event', array($this, 'update_all_product_prices'));
+        add_action('prices_update_event', array($this, 'update_all_product_prices'));
 
         // add a custom interval filter
-        add_filter('cron_schedules', array($this, 'five_minutes_interval'));
+        // add_filter('cron_schedules', array($this, 'custom_timing_interval'));
 
         // deactivation
         register_deactivation_hook(POL_PLUGIN_FILE, array($this, 'my_deactivation'));
 
     }
 
-    function five_minutes_interval($schedules)
-    {
-        $schedules['five_minutes'] = array(
-            'interval' => 1,
-            'display' => '5 minutes'
-        );
-        return $schedules;
-    }
+//    function custom_timing_interval($schedules)
+//    {
+//        $schedules['custom_interval'] = array(
+//            'interval' => WP_CRON_LOCK_TIMEOUT,
+//            'display' => 'pol custom interval'
+//        );
+//        return $schedules;
+//    }
 
     public function scheduling_activation()
     {
-        if (!wp_next_scheduled('my_event')) {
-            wp_schedule_event(time(), 'five_minutes', 'my_event');
+        if (!wp_next_scheduled('prices_update_event')) {
+            wp_schedule_event(time(), 'daily', 'prices_update_event');
         }
     }
 
@@ -57,7 +57,7 @@ class DailyUpdate
 
     function my_deactivation()
     {
-        wp_clear_scheduled_hook('my_event');
+        wp_clear_scheduled_hook('prices_update_event');
     }
 
 }

@@ -12,28 +12,19 @@
 class PriceUpdate
 {
 
-    static $products_in_cart = 'products_in_cart';
+    static $positive_products_interactions = 'positive_products_interactions';
 
     public function init()
     {
         // remove_action('template_redirect', array($this, 'wc_track_product_view'), 20);
         add_action('template_redirect', array($this, 'update_interactions'), 20);
-        add_action('woocommerce_add_to_cart', array($this, 'product_in_cart'), 10, 6);
+        add_action('woocommerce_add_to_cart', array($this, 'add_positive_product_interaction'), 10, 6);
         add_action('woocommerce_payment_complete', array($this, 'products_purchased'));
-
-
-        add_action('woocommerce_before_shop_loop', array($this, 'test_fn'));
     }
 
-    function test_fn()
+    public function add_positive_product_interaction($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data)
     {
-        echo "<br><br>Cart: ";
-        foreach (CookieList::get_items(self::$products_in_cart) as $item) echo "<br>" . $item;
-    }
-
-    public function product_in_cart($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data)
-    {
-        CookieList::add_item(self::$products_in_cart, $product_id);
+        CookieList::add_item(self::$positive_products_interactions, $product_id);
     }
 
     public function update_interactions()
@@ -47,12 +38,13 @@ class PriceUpdate
         $product_id = $post->ID;
         $product = wc_get_product($product_id);
 
-        if (in_array($product_id, CookieList::get_items(self::$products_in_cart)) == 0) {
+        if (in_array($product_id, CookieList::get_items(self::$positive_products_interactions)) == 0) {
             // negative interaction has been detected since the product has not been moved to the cart
 
             if ($product->is_type('simple')) {
                 POLApi::update_price($product_id, 0, false);
-            } else {
+
+            } elseif ($product->is_type('variable')) {
 
                 // foreach variation sending a negative feedback
                 $variations_id = $product->get_children();
@@ -66,7 +58,7 @@ class PriceUpdate
             // positive updates will be done on purchase.
         }
 
-        CookieList::remove_items(self::$products_in_cart, $product_id);
+        CookieList::remove_items(self::$positive_products_interactions, $product_id);
 
     }
 

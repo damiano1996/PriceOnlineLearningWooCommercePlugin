@@ -9,6 +9,7 @@ class ProductData
         add_filter('woocommerce_product_data_tabs', array($this, 'pol_edit_product_data_tab'));
         add_action('woocommerce_product_data_panels', array($this, 'pol_edit_product_tab_content'));
         add_action('woocommerce_admin_process_product_object', array($this, 'save_custom_field_product_options_pricing'));
+        // add_action('woocommerce_save_product_variation', array($this, 'save_custom_field_product_options_pricing'));
     }
 
     public function pol_edit_product_data_tab($tabs)
@@ -144,25 +145,29 @@ class ProductData
     private function update_track_product_metadata($product)
     {
         $product->update_meta_data('track_product', isset($_POST['track_product']) ? 'yes' : 'no');
+        // $product->save();
     }
 
     public static function is_trackable($product): bool
     {
-        return strcmp($product->get_meta('track_product'), 'yes') == 0;
+        return strcmp($product->get_meta_data('track_product'), 'yes') == 0;
     }
 
     public function save_custom_field_product_options_pricing($product)
     {
-        $this->update_track_product_metadata($product);
+        if ($product->is_type('simple')) {
+            $this->update_track_product_metadata($product);
 
-//        // updating for children in case of variational product
-//        $variations_id = $product->get_children();
-//
-//        foreach ($variations_id as $variation_id) {
-//
-//            $variation_product = wc_get_product($variation_id);
-//            $this->update_track_product_metadata($variation_product);
-//        }
+        } elseif ($product->is_type('variable')) {
+            // updating for children in case of variational product
+            $variations_id = $product->get_children();
+
+            foreach ($variations_id as $variation_id) {
+
+                $variation_product = wc_get_product($variation_id);
+                $this->update_track_product_metadata($variation_product);
+            }
+        }
     }
 
 }
