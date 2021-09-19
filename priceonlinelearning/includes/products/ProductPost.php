@@ -23,7 +23,7 @@ class ProductPost
         }
 
         // Changes and/or connects product to pol only if box is checked
-        if (ProductData::is_trackable($product)) {
+        if (!ProductData::is_trackable($product)) {
             return;
         }
 
@@ -43,5 +43,13 @@ class ProductPost
 
         $product = wc_get_product($post_id);
         POLApi::delete_product($product->get_id());
+
+        if ($product->is_type('variable')) {
+            $variations_id = $product->get_children();
+
+            foreach ($variations_id as $variation_id) {
+                POLApi::delete_product($variation_id);
+            }
+        }
     }
 }

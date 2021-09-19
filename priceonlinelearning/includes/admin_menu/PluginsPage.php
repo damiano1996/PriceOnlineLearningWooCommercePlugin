@@ -49,7 +49,8 @@ class PluginsPage
                 ?>
                 <div class="updated notice is-dismissible">
                     <p><b>Price Online Learning</b> has been successfully activated!<br>
-                        You can proceed with the <a href="admin.php?page=priceonlinelearning-settings"><b>configurations</b></a>.</p>
+                        You can proceed with the <a
+                                href="admin.php?page=priceonlinelearning-settings"><b>configurations</b></a>.</p>
                 </div>
                 <?php
             } else {

@@ -6,14 +6,6 @@ class POL
 
     protected static $_instance = null;
 
-    public static function instance(): ?POL
-    {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self();
-        }
-        return self::$_instance;
-    }
-
     public function __construct()
     {
         $this->definitions();
@@ -24,6 +16,13 @@ class POL
     public function definitions()
     {
         $this->define('POL_ABSPATH', dirname(POL_PLUGIN_FILE) . '/');
+    }
+
+    private function define($name, $value)
+    {
+        if (!defined($name)) {
+            define($name, $value);
+        }
     }
 
     public function includes()
@@ -68,11 +67,12 @@ class POL
         $priceUpdate->init();
     }
 
-    private function define($name, $value)
+    public static function instance(): ?POL
     {
-        if (!defined($name)) {
-            define($name, $value);
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
         }
+        return self::$_instance;
     }
 
 }

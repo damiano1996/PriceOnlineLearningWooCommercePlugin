@@ -123,17 +123,6 @@ class GeneralSettingsPage
 
     }
 
-    /**
-     * @throws Exception
-     */
-    public function add_all_products_from_settings()
-    {
-        if (isset($_POST['add_all_products'])) {
-            echo "<div>Number of new connected products: <b>" . POLUtils::add_update_and_save_all_products_to_pol() . "</b>.<br>";
-        }
-    }
-
-
     public function pol_options_page_html()
     {
 
@@ -208,5 +197,15 @@ class GeneralSettingsPage
 
         </div>
         <?php
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function add_all_products_from_settings()
+    {
+        if (isset($_POST['add_all_products'])) {
+            echo "<div>Number of new connected products: <b>" . POLUtils::add_update_and_save_all_products_to_pol() . "</b>.<br>";
+        }
     }
 }

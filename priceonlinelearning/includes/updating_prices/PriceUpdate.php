@@ -38,6 +38,10 @@ class PriceUpdate
         $product_id = $post->ID;
         $product = wc_get_product($product_id);
 
+        if (!ProductData::is_trackable($product)) {
+            return;
+        }
+
         if (in_array($product_id, CookieList::get_items(self::$positive_products_interactions)) == 0) {
             // negative interaction has been detected since the product has not been moved to the cart
 
@@ -58,11 +62,11 @@ class PriceUpdate
             // positive updates will be done on purchase.
         }
 
-        CookieList::remove_items(self::$positive_products_interactions, $product_id);
+        CookieList::remove_items(self::$positive_products_interactions, array($product_id));
 
     }
 
-    function products_purchased($order_id)
+    public function products_purchased($order_id)
     {
 
         $order = wc_get_order($order_id);
@@ -70,11 +74,15 @@ class PriceUpdate
         $items = $order->get_items();
 
         foreach ($items as $product) {
-            POLApi::update_price(
-                $product->get_id(),
-                0,
-                true
-            );
+
+            if (ProductData::is_trackable($product)) {
+
+                POLApi::update_price(
+                    $product->get_id(),
+                    0,
+                    true
+                );
+            }
         }
     }
 

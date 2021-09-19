@@ -20,6 +20,11 @@ class POLApi
 
     }
 
+    public static function get_price($product_id, $cluster_id)
+    {
+        return Request::send_request(self::$API_URL . 'get_price/' . $product_id . '/' . $cluster_id);
+    }
+
     public static function add_product($product_id, $name, $original_price, $min_price, $max_price, $currency, $days_consistency)
     {
         $postRequest = array(
@@ -43,11 +48,6 @@ class POLApi
     public static function delete_product($product_id)
     {
         return Request::send_request(self::$API_URL . 'delete_product/' . $product_id, array(), true);
-    }
-
-    public static function get_price($product_id, $cluster_id)
-    {
-        return Request::send_request(self::$API_URL . 'get_price/' . $product_id . '/' . $cluster_id);
     }
 
     public static function get_all_prices()

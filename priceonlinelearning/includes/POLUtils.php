@@ -37,20 +37,33 @@ class POLUtils
         return $added_products_counter;
     }
 
-    public static function set_new_price($product, $new_price)
+    public static function add_update_and_save_product_from_general_options($product): int
     {
-        $product->set_regular_price(doubleval($new_price));
-        $product->set_sale_price(false);
-        $product->save();
+        $options = get_option('plugin_options');
+
+        return self::add_update_and_save_product(
+            $product,
+            $options['min_price_option'],
+            $options['max_price_option'],
+            $options['days_consistency_option']
+        );
     }
 
-    private static function update_product_regular_and_sales_price($product)
+    public static function add_update_and_save_product($product, $min_price_ratio, $max_price_ratio, $days_consistency): int
     {
-        $result = POLApi::get_price($product->get_id(), 0);
+        $added_products_counter = 0;
 
-        if (isset($result['price'])) {
-            self::set_new_price($product, $result['price']);
+        if ($product->is_type('simple')) {
+
+            if (self::add_update_and_save_simple_product($product, $min_price_ratio, $max_price_ratio, $days_consistency)) {
+                $added_products_counter++;
+            }
+
+        } elseif ($product->is_type('variable')) {
+            $added_products_counter += self::add_update_and_save_variable_product($product, $min_price_ratio, $max_price_ratio, $days_consistency);
         }
+
+        return $added_products_counter;
     }
 
     private static function add_update_and_save_simple_product($product, $min_price_ratio, $max_price_ratio, $days_consistency): bool
@@ -76,6 +89,22 @@ class POLUtils
         return isset($result['product_id']);
     }
 
+    private static function update_product_regular_and_sales_price($product)
+    {
+        $result = POLApi::get_price($product->get_id(), 0);
+
+        if (isset($result['price'])) {
+            self::set_new_price($product, $result['price']);
+        }
+    }
+
+    public static function set_new_price($product, $new_price)
+    {
+        $product->set_regular_price(doubleval($new_price));
+        $product->set_sale_price(false);
+        $product->save();
+    }
+
     private static function add_update_and_save_variable_product($product, $min_price_ratio, $max_price_ratio, $days_consistency): int
     {
         $added_products_counter = 0;
@@ -91,35 +120,5 @@ class POLUtils
         }
 
         return $added_products_counter;
-    }
-
-    public static function add_update_and_save_product($product, $min_price_ratio, $max_price_ratio, $days_consistency): int
-    {
-        $added_products_counter = 0;
-
-        if ($product->is_type('simple')) {
-
-            if (self::add_update_and_save_simple_product($product, $min_price_ratio, $max_price_ratio, $days_consistency)) {
-                $added_products_counter++;
-            }
-
-        } elseif ($product->is_type('variable')) {
-            $added_products_counter += self::add_update_and_save_variable_product($product, $min_price_ratio, $max_price_ratio, $days_consistency);
-        }
-
-        return $added_products_counter;
-    }
-
-
-    public static function add_update_and_save_product_from_general_options($product): int
-    {
-        $options = get_option('plugin_options');
-
-        return self::add_update_and_save_product(
-            $product,
-            $options['min_price_option'],
-            $options['max_price_option'],
-            $options['days_consistency_option']
-        );
     }
 }

@@ -4,11 +4,23 @@
 class ProductData
 {
 
+    /**
+     * Method to check if the given product can be or not tracked by POL.
+     *
+     * @param $product
+     * @return bool true if metadata is yes or empty
+     */
+    public static function is_trackable($product): bool
+    {
+        $meta = $product->get_meta('track_product');
+        return strcmp($meta, 'yes') == 0 || strcmp($meta, '') == 0;
+    }
+
     public function init()
     {
         add_filter('woocommerce_product_data_tabs', array($this, 'pol_edit_product_data_tab'));
         add_action('woocommerce_product_data_panels', array($this, 'pol_edit_product_tab_content'));
-        add_action('woocommerce_admin_process_product_object', array($this, 'save_custom_field_product_options_pricing'));
+        add_action('woocommerce_admin_process_product_object', array($this, 'update_tracking_status'));
         // add_action('woocommerce_save_product_variation', array($this, 'save_custom_field_product_options_pricing'));
     }
 
@@ -22,30 +34,6 @@ class ProductData
         );
 
         return $tabs;
-    }
-
-    private function set_style()
-    {
-
-        ?>
-        <style>
-            /*#woocommerce-coupon-data ul.wc-tabs li a::before,*/
-            /*#woocommerce-product-data ul.wc-tabs li a::before,*/
-            /*.woocommerce ul.wc-tabs li a::before {*/
-            /*    content: "";*/
-            /*}*/
-
-            .woocommerce_options_panel label,
-            .woocommerce_options_panel legend {
-                width: auto;
-            }
-
-            li {
-                margin: 15px;
-            }
-        </style>
-        <?php
-
     }
 
     public function pol_edit_product_tab_content()
@@ -133,6 +121,24 @@ class ProductData
 
     }
 
+    private function set_style()
+    {
+
+        ?>
+        <style>
+            .woocommerce_options_panel label,
+            .woocommerce_options_panel legend {
+                width: auto;
+            }
+
+            li {
+                margin: 15px;
+            }
+        </style>
+        <?php
+
+    }
+
     private function print_product_info($pol_product)
     {
         echo "<p><b>Original name</b>: " . $pol_product['name'] . " ( <b>product id</b>: " . $pol_product['product_id'] . " )<br>
@@ -142,32 +148,15 @@ class ProductData
              <b>Days consistency</b>: " . $pol_product['days_consistency'] . "</p>";
     }
 
-    private function update_track_product_metadata($product)
+    /**
+     * Method to update the product status, can it be tracked by POL, or not?
+     * It does not consider variations of a given product.
+     *
+     * @param $product
+     */
+    public function update_tracking_status($product)
     {
         $product->update_meta_data('track_product', isset($_POST['track_product']) ? 'yes' : 'no');
-        // $product->save();
-    }
-
-    public static function is_trackable($product): bool
-    {
-        return strcmp($product->get_meta_data('track_product'), 'yes') == 0;
-    }
-
-    public function save_custom_field_product_options_pricing($product)
-    {
-        if ($product->is_type('simple')) {
-            $this->update_track_product_metadata($product);
-
-        } elseif ($product->is_type('variable')) {
-            // updating for children in case of variational product
-            $variations_id = $product->get_children();
-
-            foreach ($variations_id as $variation_id) {
-
-                $variation_product = wc_get_product($variation_id);
-                $this->update_track_product_metadata($variation_product);
-            }
-        }
     }
 
 }
