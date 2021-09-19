@@ -1,6 +1,9 @@
 <?php
 
-
+/**
+ * Class to add configurations to the product page of the admin section.
+ * It adds a tab to the product data section with custom settings for POL integration.
+ */
 class ProductData
 {
 

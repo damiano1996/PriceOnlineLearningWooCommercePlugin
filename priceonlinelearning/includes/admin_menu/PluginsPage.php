@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class to manage the plugin activation.
+ */
 class PluginsPage
 {
 

@@ -2,11 +2,11 @@
 
 /**
  * Plugin Name: Price Online Learning
- * Plugin URI: http://www.priceonlinelearning.com/
+ * Plugin URI: https://www.priceonlinelearning.com/
  * Description: Dynamic learning for pricing your products.
  * Version: 1.0
  * Author: Price Online Learning
- * Author URI: http://www.priceonlinelearning.com/
+ * Author URI: https://www.priceonlinelearning.com/
  * License: GPL2
  */
 

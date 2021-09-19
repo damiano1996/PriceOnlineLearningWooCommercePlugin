@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class to manage options for POL configurations.
+ */
 class MyOptions
 {
     public static function get_min_prices_options(): array

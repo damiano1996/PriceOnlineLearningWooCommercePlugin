@@ -1,6 +1,9 @@
 <?php
 
-
+/**
+ * Class to manage a product post.
+ * It adds a product to POL after an update/save; or remove it from POL after a deletion.
+ */
 class ProductPost
 {
 

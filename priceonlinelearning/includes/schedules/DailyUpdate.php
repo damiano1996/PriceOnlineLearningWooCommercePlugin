@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class to update prices of the tracked products.
+ * It sets up a cron event to update prices once time a day.
+ * Since WordPress doesn't provide threading functionalities, it will update price at the first user access of the day.
+ */
 class DailyUpdate
 {
 
@@ -12,7 +17,7 @@ class DailyUpdate
         // add_filter('cron_schedules', array($this, 'custom_timing_interval'));
 
         // deactivation
-        register_deactivation_hook(POL_PLUGIN_FILE, array($this, 'my_deactivation'));
+        register_deactivation_hook(POL_PLUGIN_FILE, array($this, 'scheduling_deactivation'));
 
     }
 
@@ -55,7 +60,7 @@ class DailyUpdate
         }
     }
 
-    function my_deactivation()
+    function scheduling_deactivation()
     {
         wp_clear_scheduled_hook('prices_update_event');
     }

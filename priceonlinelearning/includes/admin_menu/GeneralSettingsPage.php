@@ -1,6 +1,8 @@
 <?php
 
-
+/**
+ * Class to create the POL settings page for the admin user.
+ */
 class GeneralSettingsPage
 {
 

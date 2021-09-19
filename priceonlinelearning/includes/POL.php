@@ -1,6 +1,9 @@
 <?php
 
 
+/**
+ * Singleton class to include other files and initialize main objects.
+ */
 class POL
 {
 

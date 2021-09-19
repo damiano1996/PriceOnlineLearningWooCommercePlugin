@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class to manage requests.
+ */
 class Request
 {
     public static function send_request($url, $postRequest = array(), $delete = false)
