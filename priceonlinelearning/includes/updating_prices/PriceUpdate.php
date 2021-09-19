@@ -129,7 +129,7 @@ class PriceUpdate
         foreach ($order->get_items() as $item_id => $item) {
 
             $product = $item->get_product();
-            echo '<br>' . $product->get_name() . ' - ' . $product->get_id();
+            // echo '<br>' . $product->get_name() . ' - ' . $product->get_id();
 
             if (ProductData::is_trackable($product)) {
 
