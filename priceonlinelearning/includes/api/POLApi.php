@@ -5,7 +5,7 @@
  */
 class POLApi
 {
-    private static $API_URL = 'https://priceonlinelearning.herokuapp.com/api/';
+    private static $API_URL = 'https://www.priceonlinelearning.com/api/';
 
     /**
      * Method to check if the saved token is valid.
