@@ -1,2 +1,1 @@
-# PriceOnlineLearningWooCommercePlugin
-Price Online Learning plugin for WooCommerce.
+# Price Online Learning plugin for WooCommerce (WordPress)
