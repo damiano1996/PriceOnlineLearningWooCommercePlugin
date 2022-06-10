@@ -188,7 +188,7 @@ class GeneralSettingsPage
                 <br>
                 If you have the skills to design a clustering algorithm,
                 you can create clusters among your users and communicate the identifier of the cluster to POL using the
-                <a href="https://priceonlinelearning.herokuapp.com/api/api_documentation/" target="_blank">APIs</a>.
+                <a href="https://priceonlinelearning.herokuapp.com/api/api-documentation/" target="_blank">APIs</a>.
                 <br>
                 <b>This plugin does not create clusters among your users.</b>
                 This means that if you have a MEDIUM or PRO plan on POL, you lose the benefit of providing different
